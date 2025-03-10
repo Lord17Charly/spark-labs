@@ -1,54 +1,19 @@
-name: spark
-# Controls when the workflow will run
-on:
-  # Triggers the workflow on push or pull request events but only for the "main" branch
-  push:
-    branches: [ "main" ]
-  pull_request:
-    branches: [ "main" ]
-  # Allows you to run this workflow manually from the Actions tab
-  repository_dispatch:
-    types: [spark]
+from pyspark.sql import SparkSession
 
-# A workflow run is made up of one or more jobs that can run sequentially or in parallel
-jobs:
-  # This workflow contains a single job called "spark"
-  spark:
-    # The type of runner that the job will run on
-    runs-on: ubuntu-latest
+# Crear una sesión de Spark
+spark = SparkSession.builder.appName("HelloWorld").getOrCreate()
 
-    # Define permisos para el token de GitHub
-    permissions:
-      contents: write  # Permite escribir cambios en el repo
+# Ejecutar una consulta SQL
+df = spark.sql("SELECT 'Hello World' as hello")
 
-    steps:
-      - uses: actions/checkout@v4
+# Mostrar el resultado en consola
+df.show()
 
-      - name: Listar archivos en el directorio
-        run: ls -la  
+# Guardar el resultado en un archivo JSON
+df.write.mode("overwrite").json("results")
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: '3.10'
 
-      - uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: temurin
 
-      - uses: vemonet/setup-spark@v1
-        with:
-          spark-version: '3.5.3'
-          hadoop-version: '3'
-
-      - name: Verificar versión de Spark
-        run: spark-submit --version
-
-      - name: Ejecutar script hello.py
-        run: spark-submit --master local hello.py
-
-      - name: Ver archivos después de ejecución
-        run: ls -la 
 
 
 
